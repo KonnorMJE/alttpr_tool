@@ -12,7 +12,7 @@ A Python-based application designed to automate and enhance the process of setti
 ## Installation
 
 ### Windows
-1. Download the latest release from the [Releases](link-to-releases) page
+1. Download the latest release from the [Releases](https://github.com/KonnorMJE/alttpr_tool_2/releases) page
 2. Extract the zip file
 3. Run `alttpr_tool.exe`
 
@@ -60,8 +60,13 @@ Special thanks to:
 - The sahasrahbot repository for preset files
 
 ## Contact
-- Discord: [Your Discord]
 - Email: konnormje@gmail.com
 
-## License
-[MIT License](LICENSE)
+## MIT License
+Copyright 2025 KonnorMJE
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
