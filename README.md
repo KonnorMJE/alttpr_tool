@@ -25,7 +25,7 @@ Note: Windows may show a security warning. This is a false positive due to the P
 ## First-Time Setup
 
 1. On first launch, the program will create:
-   - `errors.log` for logging
+   - `log_file.log` for logging
    - `alttpr_tool.db` for application state
    - A "CHANGEME" folder for default paths
 2. You'll need to authenticate with Google (use your provided Gmail account)
