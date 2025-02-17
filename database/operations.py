@@ -14,6 +14,17 @@ def get_user_settings():
     with managed_session() as session:
         settings = session.query(Configuration).first()
         if settings:
+            # Check if paths still exist after moving
+            if not os.path.exists(settings.download_dir) or not os.path.exists(settings.msu_master_dir):
+                # Reset paths to default if original paths don't exist
+                base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+                settings.download_dir = os.path.join(base_dir, '_internal', 'CHANGEME')
+                settings.msu_master_dir = os.path.join(base_dir, '_internal', 'CHANGEME')
+                
+                # Create directories if they don't exist
+                os.makedirs(settings.download_dir, exist_ok=True)
+                os.makedirs(settings.msu_master_dir, exist_ok=True)
+                
             logging.info("User settings retrieved from database")
             return {
                 "download_dir": settings.download_dir,

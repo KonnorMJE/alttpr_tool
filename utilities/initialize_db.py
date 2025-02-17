@@ -18,16 +18,15 @@ def initialize_db():
     Base.metadata.create_all(engine)
 
     with Session() as session:
-        settings_exists = session.query(Configuration).first() is not None
-
-        if not settings_exists:
-            change_me_dir = os.path.join(BASE_DIR, "CHANGEME")
-            if not os.path.exists(change_me_dir):
-                os.mkdir(change_me_dir)
-                logging.info(f"Created 'CHANGEME' directory at {change_me_dir}")
-
-            default_download_dir = change_me_dir
-            default_msu_master_dir = change_me_dir
+        if not session.query(Configuration).first():
+            base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+            default_download_dir = os.path.join(base_dir, '_internal', 'CHANGEME')
+            default_msu_master_dir = os.path.join(base_dir, '_internal', 'CHANGEME')
+            
+            # Create directories
+            os.makedirs(default_download_dir, exist_ok=True)
+            os.makedirs(default_msu_master_dir, exist_ok=True)
+            
             default_config = Configuration(
                 download_dir=default_download_dir,
                 msu_master_dir=default_msu_master_dir,
