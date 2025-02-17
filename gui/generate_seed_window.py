@@ -1,6 +1,7 @@
 import logging
 import os
 import webbrowser
+import yaml
 
 import asyncio
 import customtkinter as ctk  # Keep this for background handling
@@ -8,7 +9,7 @@ from tkinter import messagebox
 import ttkbootstrap as ttk
 from PIL import Image
 
-from config import APP_HEIGHT, APP_WIDTH, BUTTON_WIDTH, DARK_DIR, LIGHT_DIR
+from config import APP_HEIGHT, APP_WIDTH, BUTTON_WIDTH, DARK_DIR, LIGHT_DIR, PRESETS_DIR
 from utilities.seed_generator import (get_yaml_presets,
                                       main_generate)
 import database.operations as db_ops
@@ -54,11 +55,20 @@ class GenerateSeedWindow(ttk.Frame):
         self.seed_preset_selection_dropdown.configure(state='readonly')
         self.seed_preset_selection_dropdown.grid(row=2, column=0, columnspan=2, padx=15, pady=15)
 
+        # Add spoiler checkbox
+        self.spoiler_var = ttk.BooleanVar(value=False)
+        self.spoiler_checkbox = ttk.Checkbutton(
+            self, 
+            text="Enable Spoiler Log",
+            variable=self.spoiler_var
+        )
+        self.spoiler_checkbox.grid(row=3, column=0, padx=15, pady=15, columnspan=2)
+
         self.next_button = ttk.Button(self, text="Next", width=BUTTON_WIDTH, command=self.controller.show_sfc_selection_window)
-        self.next_button.grid(row=3, column=0, padx=15, pady=15, sticky="e")
+        self.next_button.grid(row=4, column=0, padx=15, pady=15, sticky="e")
         
         self.generate_seed_button = ttk.Button(self, text="Generate", width=BUTTON_WIDTH, command=self.generate_seed)
-        self.generate_seed_button.grid(row=3, column=1, padx=15, pady=15, sticky="w")
+        self.generate_seed_button.grid(row=4, column=1, padx=15, pady=15, sticky="w")
 
         for i in range(2):
             self.grid_columnconfigure(i, weight=1)
@@ -71,12 +81,14 @@ class GenerateSeedWindow(ttk.Frame):
 
         try:
             preset_name = self.seed_preset_selection_dropdown.get()
+            enable_spoilers = self.spoiler_var.get()
+
+            # Update the preset file with spoiler setting before generating
+            self.update_preset_spoilers(preset_name, enable_spoilers)
 
             loop = asyncio.get_event_loop()
-            seed = loop.run_until_complete(main_generate(preset_name)
-)
+            seed = loop.run_until_complete(main_generate(preset_name))
 
-            # Assuming 'seed' has a 'url' attribute; adjust as necessary based on your implementation
             if seed and hasattr(seed, 'url'):
                 webbrowser.open(seed.url)
                 logging.info(f"Seed URL opened in browser: {seed.url}")
@@ -86,6 +98,38 @@ class GenerateSeedWindow(ttk.Frame):
         except Exception as e:
             logging.error(f"Error generating seed: {e}", exc_info=True)
 
+    def update_preset_spoilers(self, preset_name, enable_spoilers):
+        """Update the spoiler setting in the preset file."""
+        try:
+            preset_path = os.path.join(PRESETS_DIR, f"{preset_name}.yaml")
+            
+            # Read current preset
+            with open(preset_path, 'r') as f:
+                preset_data = yaml.safe_load(f)
+
+            # Update spoiler setting
+            if 'settings' in preset_data:
+                # Handle nested settings structure
+                if isinstance(preset_data['settings'].get('spoilers', False), bool):
+                    preset_data['settings']['spoilers'] = enable_spoilers
+                else:
+                    preset_data['settings']['spoilers'] = "on" if enable_spoilers else "off"
+            else:
+                # Handle root level settings
+                if isinstance(preset_data.get('spoilers', False), bool):
+                    preset_data['spoilers'] = enable_spoilers
+                else:
+                    preset_data['spoilers'] = "on" if enable_spoilers else "off"
+
+            # Write updated preset back to file
+            with open(preset_path, 'w') as f:
+                yaml.safe_dump(preset_data, f, default_flow_style=False)
+
+            logging.info(f"Updated spoiler setting to {enable_spoilers} in preset {preset_name}")
+
+        except Exception as e:
+            logging.error(f"Error updating preset spoiler setting: {e}")
+            raise
 
     def get_user_settings(self):
         return db_ops.get_user_settings()
