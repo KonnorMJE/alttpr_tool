@@ -54,19 +54,18 @@ def get_sfc_files():
         raise
 
 def get_msus():
-    """Get a list of MSU folders in the MSU directory."""
+    """Get list of MSU folders."""
     msus_dir = get_msu_dir()
     try:
+        # Create directory if it doesn't exist
+        os.makedirs(msus_dir, exist_ok=True)
+        
         msu_entries = os.listdir(msus_dir)
-        msus = [entry for entry in msu_entries if os.path.isdir(os.path.join(msus_dir, entry))]
-        logging.info("MSU folders retrieved: %s", msus)
-        return msus
-    except FileNotFoundError:
-        logging.error("The directory %s does not exist", msus_dir)
-        raise
+        return [entry for entry in msu_entries 
+                if os.path.isdir(os.path.join(msus_dir, entry))]
     except Exception as e:
-        logging.exception("An unexpected error occurred: %s", e)
-        raise
+        logging.error(f"Error getting MSUs: {e}")
+        return []
 
 def get_msu_name_convention(msu_name):
     """Get the naming convention of MSU files within a given MSU folder."""
