@@ -55,6 +55,23 @@ class App(tk.Tk):
             self.show_generate_seed_window()
 
         logging.info("Application initialization completed")
+        
+        try:
+            # First try the development path
+            self.iconbitmap('gui/assets/icons/app-icon.ico')
+        except:
+            # If that fails, try the PyInstaller path
+            import os
+            import sys
+            if getattr(sys, 'frozen', False):
+                # If the application is run as a bundle
+                application_path = sys._MEIPASS
+            else:
+                # If the application is run from a Python interpreter
+                application_path = os.path.dirname(os.path.abspath(__file__))
+            
+            icon_path = os.path.join(application_path, 'gui', 'assets', 'icons', 'app-icon.ico')
+            self.iconbitmap(icon_path)
 
     def on_select(self, selection):
         frame_class = self.frame_names[selection]
