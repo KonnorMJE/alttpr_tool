@@ -6,7 +6,7 @@ A Python-based application designed to automate and enhance the process of setti
 
 - **MSU Audio Track Management**: Download and select MSU audio packs
 - **Seed Generation**: Generate new game seeds with various presets
-- **API Integration**: Utilizes pyz3r library for alttpr.com interactions
+- **API Integration**: Utilizes [pyz3r](https://github.com/tcprescott/pyz3r) library for alttpr.com interactions
 - **Google Integration**: Access Google Drive & Sheets for MSU pack management from the ALTTPR MSU Sheet
 
 ## Installation
@@ -51,16 +51,9 @@ The database file is located in `_internal/database` if you need to manage or re
 - Windows: 7zip (included)
 - MacOS/Linux: UNRAR
 
-## Contributing
-Contributions are welcome! Please feel free to submit a Pull Request.
-
 ## Acknowledgements
 Special thanks to:
-- [@tcprescott](https://github.com/tcprescott) (Synack on Discord) for the pyz3r repository
-- The sahasrahbot repository for preset files
-
-## Contact
-- Email: konnormje@gmail.com
+- [@tcprescott](https://github.com/tcprescott) (Synack on Discord) for the [pyz3r](https://github.com/tcprescott/pyz3r) and [sahasrahbot](https://github.com/tcprescott/sahasrahbot) repositories
 
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
