@@ -18,12 +18,13 @@ class SetupWindow(ttk.Frame):
 
         self.download_path = StringVar()
         self.msu_master_path = StringVar()
+        self.tracker_path = StringVar()
 
         settings = self.get_user_settings()
         if settings:
             self.download_path.set(settings["download_dir"])
             self.msu_master_path.set(settings["msu_master_dir"])
-
+            self.tracker_path.set(settings["tracker_path"])
         self.background_image_file = 'Settings.png'  # Define background image file name
 
         # Create background frame to hold background image & place it.
@@ -71,28 +72,38 @@ class SetupWindow(ttk.Frame):
         self.msu_path_button = ttk.Button(self, text="📁", command=self.set_msu_entry)
         self.msu_path_button.grid(row=2, column=1, padx=10, pady=5, sticky="e")
 
+        # Tracker Path Label & Entry
+        self.tracker_label = ttk.Label(self, text="Tracker Application:")
+        self.tracker_label.grid(row=3, column=0, padx=10, pady=5)
+
+        self.tracker_entry = ttk.Entry(self, textvariable=self.tracker_path)
+        self.tracker_entry.grid(row=3, column=1, padx=10, pady=5, sticky="ew")
+
+        self.tracker_path_button = ttk.Button(self, text="📁", command=self.set_tracker_entry)
+        self.tracker_path_button.grid(row=3, column=1, padx=10, pady=5, sticky="e")
+
         # Checkboxes
         self.dark_mode_var = IntVar(value=0)
         self.dark_mode_chk = ttk.Checkbutton(self, text="Dark Mode", variable=self.dark_mode_var)
-        self.dark_mode_chk.grid(row=3, column=0, padx=10, pady=5)
+        self.dark_mode_chk.grid(row=4, column=0, padx=10, pady=5)
 
         self.auto_run_var = IntVar(value=0)
         self.auto_run_chk = ttk.Checkbutton(self, text="Auto Run", variable=self.auto_run_var)
-        self.auto_run_chk.grid(row=3, column=1, padx=10, pady=5)
+        self.auto_run_chk.grid(row=4, column=1, padx=10, pady=5)
 
         # Save & Cancel Buttons
         self.save_button = ttk.Button(self, text="Save", width=BUTTON_WIDTH, command=self.save_and_switch)
-        self.save_button.grid(row=4, column=0, padx=10, pady=(5, 10))
+        self.save_button.grid(row=5, column=0, padx=10, pady=(5, 10))
 
         self.cancel_button = ttk.Button(self, text="Cancel", width=BUTTON_WIDTH, command=self.cancel_button_press)
-        self.cancel_button.grid(row=4, column=1, padx=10, pady=(5, 10))
+        self.cancel_button.grid(row=5, column=1, padx=10, pady=(5, 10))
 
         # Configure columns for resizing
         self.grid_columnconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
         # Configure rows
-        for i in range(5):
+        for i in range(6):
             self.grid_rowconfigure(i, weight=1)
 
     def select_folder(self):
@@ -110,6 +121,14 @@ class SetupWindow(ttk.Frame):
         self.msu_entry.delete(0, ttk.END)
         self.msu_entry.insert(0, msu_path)
 
+    def set_tracker_entry(self):
+        tracker_path = filedialog.askopenfilename(
+            filetypes=[("Executable files", "*.exe"), ("All files", "*.*")]
+        )
+        if tracker_path:  # Only update if a file was selected
+            self.tracker_entry.delete(0, ttk.END)
+            self.tracker_entry.insert(0, tracker_path)
+
     def get_user_settings(self):
         """Retrieve user settings from the database."""
         return db_ops.get_user_settings()
@@ -119,6 +138,7 @@ class SetupWindow(ttk.Frame):
         logging.info("Attempting to save settings and switch window")
         download_path = self.download_path.get().strip("\"")
         msu_master_path = self.msu_master_path.get().strip("\"")
+        tracker_path = self.tracker_path.get().strip("\"")
         dark_mode = self.dark_mode_var.get()
         auto_run = self.auto_run_var.get()
 
@@ -131,7 +151,7 @@ class SetupWindow(ttk.Frame):
         else:
             if os.path.exists(os.path.join(BASE_DIR, 'CHANGEME')):
                 shutil.rmtree(os.path.join(BASE_DIR, 'CHANGEME'))
-            self.save_to_db(download_path, msu_master_path, dark_mode, auto_run)
+            self.save_to_db(download_path, msu_master_path, tracker_path, dark_mode, auto_run)
             self.controller.show_sfc_selection_window()
 
     def cancel_button_press(self):
@@ -148,10 +168,10 @@ class SetupWindow(ttk.Frame):
         else:
             self.controller.show_main_window()
 
-    def save_to_db(self, download_path, msu_master_path, dark_mode_var, auto_run_var):
+    def save_to_db(self, download_path, msu_master_path, tracker_path, dark_mode_var, auto_run_var):
         """Save the provided settings to the database."""
-        logging.info(f"Saving settings to database: {download_path}, {msu_master_path}, {dark_mode_var}, {auto_run_var}")
-        db_ops.save_settings_to_db(download_path, msu_master_path, dark_mode_var, auto_run_var)
+        logging.info(f"Saving settings to database: {download_path}, {msu_master_path}, {tracker_path}, {dark_mode_var}, {auto_run_var}")
+        db_ops.save_settings_to_db(download_path, msu_master_path, tracker_path, dark_mode_var, auto_run_var)
     
     def reset_window(self):
         """Reset the window to reflect the current settings."""
@@ -165,11 +185,13 @@ class SetupWindow(ttk.Frame):
         if settings:
             self.download_path.set(settings["download_dir"])
             self.msu_master_path.set(settings["msu_master_dir"])
+            self.tracker_path.set(settings["tracker_path"])
             self.dark_mode_var.set(settings["dark_mode"])
             self.auto_run_var.set(settings["auto_run"])
         else:
             self.download_path.set("")
             self.msu_master_path.set("")
+            self.tracker_path.set("")
             self.dark_mode_var.set(0)
             self.auto_run_var.set(0)
 

@@ -128,7 +128,7 @@ class MainWindow(ttk.Frame):
 
         return self.msu_select_dropdown.get()
     
-    def run_sfc(self, path):
+    def auto_run(self, path):
         try:
             if platform.system() == 'Windows':
                 os.startfile(path)
@@ -160,4 +160,7 @@ class MainWindow(ttk.Frame):
             if os.path.exists(new_sfc_path):
                 messagebox.showinfo("Info", f"SFC successfully moved to {get_full_msu_dir(msu)}")
                 if get_user_settings()['auto_run'] == 1:
-                    self.run_sfc(new_sfc_path)
+                    self.auto_run(new_sfc_path)
+
+            if get_user_settings()['tracker_path']:
+                self.auto_run(get_user_settings()['tracker_path'])

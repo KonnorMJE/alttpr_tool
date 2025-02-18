@@ -29,6 +29,7 @@ def get_user_settings():
             return {
                 "download_dir": settings.download_dir,
                 "msu_master_dir": settings.msu_master_dir,
+                "tracker_path": settings.tracker_path,
                 "dark_mode": settings.dark_mode,
                 "auto_run": settings.auto_run,
                 "sfc_file": settings.sfc_file
@@ -39,17 +40,19 @@ def get_user_settings():
             return {
                 "download_dir": default_path,
                 "msu_master_dir": default_path,
+                "tracker_path": None,
                 "dark_mode": 0,
                 "auto_run": 0,
                 "sfc_file": None
             }
 
-def save_settings_to_db(download_path, msu_master_path, dark_mode_var, auto_run_var):
+def save_settings_to_db(download_path, msu_master_path, tracker_path, dark_mode_var, auto_run_var):
     """
     Save user settings to the database.
 
     :param download_path: Path to the download directory.
     :param msu_master_path: Path to the MSU master directory.
+    :param tracker_path: Path to the tracker application.
     :param dark_mode_var: Dark mode setting.
     :param auto_run_var: Auto-run setting.
     """
@@ -57,12 +60,13 @@ def save_settings_to_db(download_path, msu_master_path, dark_mode_var, auto_run_
         settings = session.query(Configuration).first()
 
         if not settings:
-            settings = Configuration(download_dir=download_path, msu_master_dir=msu_master_path, dark_mode=dark_mode_var, auto_run=auto_run_var)
+            settings = Configuration(download_dir=download_path, msu_master_dir=msu_master_path, tracker_path=tracker_path, dark_mode=dark_mode_var, auto_run=auto_run_var)
             session.add(settings)
             logging.info("New user settings saved to database")
         else:
             settings.download_dir = download_path
             settings.msu_master_dir = msu_master_path
+            settings.tracker_path = tracker_path
             settings.dark_mode = dark_mode_var
             settings.auto_run = auto_run_var
             logging.info("User settings updated in database")
