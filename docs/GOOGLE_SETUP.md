@@ -61,6 +61,6 @@ ALTTPR Tool needs permission to read your Google Sheets data. This setup process
 
 ## Troubleshooting
 - **"App not verified" warning?** This is normal. Click "Advanced" → "Go to ALTTPR Tool (unsafe)"
-- **Need help?** [Open an Issue](https://github.com/yourusername/alttpr_tool/issues)
+- **Need help?** [Open an Issue](https://github.com/konnormje/alttpr_tool/issues)
 
 > **Note**: The application will create a `token.pickle` file after successful authorization. This token handles future authentication.
