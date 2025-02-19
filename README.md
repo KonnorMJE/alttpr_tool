@@ -8,6 +8,7 @@ A Python-based application designed to automate and enhance the process of setti
 - **Seed Generation**: Generate new game seeds with various presets
 - **API Integration**: Utilizes [pyz3r](https://github.com/tcprescott/pyz3r) library for alttpr.com interactions
 - **Google Integration**: Access Google Drive & Sheets for MSU pack management from the ALTTPR MSU Sheet
+- **Auto start your tracker**: Define the path to your tracker executable, and the application will automatically start it once you've selected your MSU.
 
 ## Installation
 
@@ -19,8 +20,7 @@ A Python-based application designed to automate and enhance the process of setti
 Note: Windows may show a security warning. This is a false positive due to the Python-based executable. Click "More Info" → "Run Anyway" to proceed.
 
 ### MacOS/Linux Users
-- Install UNRAR for archive extraction support
-- (Additional installation steps to be added)
+- A non-windows executable is not yet available, but is in the works.
 
 ## First-Time Setup
 
@@ -49,7 +49,6 @@ The database file is located in `_internal/database` if you need to manage or re
 
 ## Dependencies
 - Windows: 7zip (included)
-- MacOS/Linux: UNRAR
 
 ## Acknowledgements
 Special thanks to:
@@ -59,4 +58,15 @@ Special thanks to:
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## Google API Setup
-For MSU downloading functionality, you'll need to set up Google API access. See [Google API Setup Guide](docs/GOOGLE_SETUP.md) for detailed instructions.
+To use MSU downloading features, you'll need Google API access. Starting with version 1.1.0, there are two ways to set this up:
+
+### Option 1: Use the "Managed" version (Recommended)
+1. Download the "Managed" release (includes`client_secrets.json` file)
+2. Send your Gmail address to [konnormje@gmail.com](mailto:konnormje@gmail.com) to be added to the testing whitelist
+   > Note: This whitelist requirement is temporary until the Google Cloud project exits testing mode
+3. Run the application and follow the OAuth prompt
+
+### Option 2: Create Your Own Google Cloud Project
+1. Download the "Selfhosted" release (no `client_secrets.json` file)
+2. Set up your own Google Cloud project and credentials
+3. Follow the instructions in the [Google API Setup Guide](docs/GOOGLE_SETUP.md)
