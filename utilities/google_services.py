@@ -8,7 +8,7 @@ from google.auth.transport.requests import Request
 from googleapiclient.discovery import build
 
 # Import from config file
-from config import TOKEN_PATH, GOOGLE_CREDENTIALS_PATH, GOOGLE_SCOPES
+from config import TOKEN_PATH, CLIENT_SECRETS_FILE, GOOGLE_SCOPES
 
 def authenticate_service():
     """
@@ -40,7 +40,10 @@ def authenticate_service():
             logging.error("The authentication token has expired or been revoked. Please re-authenticate.")
 
         if not creds:
-            flow = InstalledAppFlow.from_client_secrets_file(GOOGLE_CREDENTIALS_PATH, GOOGLE_SCOPES)
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRETS_FILE,
+                GOOGLE_SCOPES
+            )
             creds = flow.run_local_server(port=0)
             logging.info("Ran authentication flow and obtained new credentials")
 

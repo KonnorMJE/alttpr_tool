@@ -62,7 +62,7 @@ DOWNLOAD_DIR = os.path.expanduser('~\Downloads')
 MSU_MASTER_DIR = os.path.join('D:\ALTTPR', 'MSUs')
 
 # Google API Configurations
-GOOGLE_CREDENTIALS_PATH = os.path.join(DATA_DIR, 'credentials.json')
+CLIENT_SECRETS_FILE = os.path.join(DATA_DIR, 'client_secrets.json')
 TOKEN_PATH = os.path.join(DATA_DIR, 'token.pickle')
 GOOGLE_SCOPES = ['https://www.googleapis.com/auth/drive.readonly',
                  'https://www.googleapis.com/auth/spreadsheets.readonly'

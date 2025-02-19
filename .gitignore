@@ -17,5 +17,5 @@ log_level.txt
 *.db
 
 # Credentials
-credentials.json
+client_secrets.json
 token.pickle
