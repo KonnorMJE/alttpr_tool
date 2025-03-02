@@ -9,3 +9,4 @@ pyz3r==6.1.0
 rarfile==4.1
 SQLAlchemy==2.0.23
 ttkbootstrap==1.10.1
+PyQt6>=6.6.0
