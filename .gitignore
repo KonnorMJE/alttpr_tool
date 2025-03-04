@@ -15,6 +15,7 @@ venv/
 *.log
 log_level.txt
 *.db
+.DS_Store
 
 # Credentials
 client_secrets.json
