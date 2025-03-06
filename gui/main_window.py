@@ -1,166 +1,120 @@
-import logging
-import os
-import platform
-import subprocess
+from PyQt6.QtWidgets import (QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
+                            QLabel, QStackedWidget)
+from PyQt6.QtCore import Qt, QSize
+from PyQt6.QtGui import QIcon
 
-import customtkinter as ctk
-import ttkbootstrap as ttk
-from ttkbootstrap.constants import *
-from PIL import Image, ImageTk
-from tkinter import messagebox
+from alttpr_tool.gui.widgets.nav_button import NavButton
+from alttpr_tool.gui.tabs import (
+    GenerateSeedTab,
+    MSUDownloadTab,
+    MSUSelectTab,
+    SeedHistoryTab,
+    SetupTab
+)
 
-from config import APP_HEIGHT, APP_WIDTH, BUTTON_WIDTH, DARK_DIR, LIGHT_DIR
-from database.operations import get_selected_sfc, get_user_settings
-from utilities.file_management import get_full_msu_dir, get_msus, get_msu_name_convention, move_file, rmv_existing_sfc
+class MainWindow(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        self.setWindowTitle("ALTTPR Tool")
+        self.setMinimumSize(900, 600)
+        self.setMaximumSize(900, 600)
 
-class MainWindow(ttk.Frame):
-    def __init__(self, parent, controller):
-        super().__init__(parent)
-        self.controller = controller
+        main_widget = QWidget()
+        self.setCentralWidget(main_widget)
+        layout = QHBoxLayout(main_widget)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(0)
 
-        logging.info("MainWindow initialized")
+        # Sidebar
+        sidebar = QWidget()
+        sidebar.setFixedWidth(180)
+        sidebar.setStyleSheet("""
+            QWidget {
+                background-color: #90A959;  /* Matcha green */
+                color: #f6edd9;  /* Light cream text */
+            }
+        """)
+        sidebar_layout = QVBoxLayout(sidebar)
+        sidebar_layout.setContentsMargins(0, 0, 0, 0)
+        sidebar_layout.setSpacing(0)
 
-        self.msu_folders = get_msus()
+        # Logo/Title area
+        title_widget = QWidget()
+        title_layout = QHBoxLayout(title_widget)
         
-        logging.debug(f"MSU folders loaded: {self.msu_folders}")
-
-        # Define background image file name
-        self.background_image_file = 'MSUSelect.png'
-
-        # Create background frame to hold background image & place it.
-        self.background_frame = ctk.CTkFrame(self)
-        self.background_frame.place(x=0, y=0, relwidth=1, relheight=1) 
-
-        # Create light and dark mode background images
-        self.light_image = Image.open(os.path.join(LIGHT_DIR, self.background_image_file)) 
-        self.dark_image = Image.open(os.path.join(DARK_DIR, self.background_image_file)) 
-
-        # Create customtkinter image with the light and dark images
-        self.bg_image = ctk.CTkImage(light_image=self.light_image, dark_image=self.dark_image, size=(APP_WIDTH, APP_HEIGHT))
+        # Optional: Add logo to title
+        logo_label = QLabel()
+        logo_label.setPixmap(QIcon("/Users/konnorkurilla/Documents/Development/Personal/alttpr_tool/refactor/gui/assets/icons/app-icon.ico").pixmap(QSize(32, 32)))
+        title_layout.addWidget(logo_label)
         
-        # Create and place label for holding the background image
-        self.bg_image_label = ctk.CTkLabel(self.background_frame, image=self.bg_image, text="")
-        self.bg_image_label.grid(row=0, column=0)
+        title = QLabel("ALTTPR Tool")
+        title.setStyleSheet("font-size: 15px; padding: 10px; font-weight: bold;")
+        title_layout.addWidget(title)
+        sidebar_layout.addWidget(title_widget)
 
-        # Nav Menu
-        self.nav_menu = ttk.OptionMenu(self, self.controller.selected_frame, *self.controller.frame_names.keys(), command=controller.on_select)
-        self.nav_menu.grid(row=0, column=0, sticky="nw")
+        # Main navigation
+        nav_section = QLabel("NAVIGATION")
+        nav_section.setStyleSheet("color: #F4F1DE; padding: 15px 25px 5px 25px; font-size: 12px; opacity: 0.8;")
+        sidebar_layout.addWidget(nav_section)
 
-        # Label
-        self.msu_select_label = ttk.Label(self, text="Select the MSU you'd like to use")
-        self.msu_select_label.grid(row=1, column=0, padx=15, pady=15)
+        # Navigation buttons with icons
+        self.nav_buttons = []
+        pages = [
+            ("icons/controller.png", "MSU Select", "Select MSU packs", MSUSelectTab),
+            ("icons/controller.png", "Generate Seed", "Create new seeds", GenerateSeedTab),
+            ("icons/music.png", "Download MSUs", "Download MSU packs", MSUDownloadTab),
+            ("icons/history.png", "Seed History", "View seed history", SeedHistoryTab),
+        ]
 
-        # Dropdown
-        self.msu_select_dropdown = ttk.Combobox(self, width=50, values=self.msu_folders)
-        self.msu_select_dropdown.configure(state='readonly')
-        self.msu_select_dropdown.grid(row=2, column=0, padx=15, pady=15)
+        for icon_path, text, tooltip, page_class in pages:
+            btn = NavButton(icon_path, text, tooltip)
+            btn.clicked.connect(lambda checked, p=page_class: self.switch_page(p))
+            sidebar_layout.addWidget(btn)
+            self.nav_buttons.append(btn)
 
-        # Button to Confirm MSU Selection
-        self.confirm_button = ttk.Button(self, text="Confirm", width=BUTTON_WIDTH, command=self.confirm_msu_selection)
-        self.confirm_button.grid(row=3, column=0, padx=60, pady=15, sticky="w")
+        sidebar_layout.addStretch()
 
-        # Button to Settings Window
-        self.settings_button = ttk.Button(self, text="Settings", width=BUTTON_WIDTH, command=self.controller.show_setup_window)
-        self.settings_button.grid(row=3, column=0, padx=60, pady=15)
+        # Settings section at bottom
+        settings_section = QLabel("SETTINGS")
+        settings_section.setStyleSheet("color: #F4F1DE; padding: 5px 25px; font-size: 12px; opacity: 0.8;")
+        sidebar_layout.addWidget(settings_section)
 
-        # Button to MSU Download Window
-        self.msu_download_button = ttk.Button(self, text="Download MSUs", width=15, command=self.controller.show_msu_download_window)
-        self.msu_download_button.grid(row=3, column=0, padx=60, pady=15, sticky="e")
+        settings_btn = NavButton("icons/settings.png", "Settings")
+        settings_btn.setCheckable(True)
+        settings_btn.clicked.connect(lambda: self.switch_page(SetupTab))
+        self.nav_buttons.append(settings_btn)
+        sidebar_layout.addWidget(settings_btn)
 
-        # Button to go back to SFC Selection Window
-        self.back_button = ttk.Button(self, text="Back", width=10, command=self.controller.show_sfc_selection_window)
-        self.back_button.grid(row=4, column=0, padx=15, pady=15)
+        # Version number
+        version = QLabel("v1.0.0")
+        version.setStyleSheet("color: #F4F1DE; padding: 15px; font-size: 12px; opacity: 0.7;")
+        version.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        sidebar_layout.addWidget(version)
 
-        # Iterates through a range to configure column weights
-        for i in range(1):
-            self.grid_columnconfigure(i, weight=1)
+        layout.addWidget(sidebar)
 
-    def reset_window(self):
-        """Resets the GUI widgets state within the frame."""
-        
-        logging.info("Resetting MainWindow...")
-        
-        self.msu_folders = get_msus()
-        
-        logging.debug(f"MSU folders: {self.msu_folders}")
+        # Content area
+        self.stack = QStackedWidget()
 
-        # Update the dropdown with the refreshed list of MSU folders.
-        self.msu_select_dropdown['values'] = self.msu_folders
+        layout.addWidget(self.stack)
 
-        # Clear the current selection in the dropdown.
-        self.msu_select_dropdown.set("")
+        # Add pages to stack
+        for _, _, _, page_class in pages:
+            self.stack.addWidget(page_class())
+        self.stack.addWidget(SetupTab())
 
-        # Pre-select the first item in the dropdown if available.
-        if self.msu_folders:
-            self.msu_select_dropdown.set(self.msu_folders[0])
+        # Set initial page
+        self.nav_buttons[0].setChecked(True)
+        self.stack.setCurrentIndex(0)
 
-        # Force update the dropdown (may not be necessary, but can be tried if all else fails)
-        self.msu_select_dropdown.update()
+    def switch_page(self, page_class):
+        # Uncheck all buttons except the clicked one
+        for btn in self.nav_buttons:
+            if btn.text() != self.sender().text():
+                btn.setChecked(False)
 
-        # Destroy the old dropdown
-        self.msu_select_dropdown.destroy()
-
-        # Recreate the dropdown with the refreshed list of MSU folders.
-        self.msu_select_dropdown = ttk.Combobox(self, width=50, values=self.msu_folders)
-        self.msu_select_dropdown.configure(state='readonly')
-        self.msu_select_dropdown.grid(row=2, column=0, padx=15, pady=15)
-
-        # Set the default value if available
-        if self.msu_folders:
-            self.msu_select_dropdown.set(self.msu_folders[0])
-
-        if self.get_user_settings()['dark_mode'] == 0:
-            ctk.set_appearance_mode('light')
-        else:
-            ctk.set_appearance_mode('dark')
-
-        logging.info("MainWindow reset complete.")
-
-    def get_user_settings(self):
-        return get_user_settings()
-
-    def get_selected_msu(self):
-        """
-        Get selected MSU from the dropdown
-        
-        :return: Selected MSU from the dropdown, pulling from the set MSU Master Dir
-        """
-
-        return self.msu_select_dropdown.get()
-    
-    def auto_run(self, path):
-        try:
-            if platform.system() == 'Windows':
-                os.startfile(path)
-            elif platform.system() == 'Darwin':
-                subprocess.run(['open', path])
-            else:
-                subprocess.run(['xdg-open', path])
-        except Exception as e:
-            logging.error(f"Failed to open file: {e}", exc_info=True)
-            raise
-
-    def confirm_msu_selection(self):
-        msu = self.get_selected_msu()
-        logging.info(f"MSU selected: {msu}")
-        naming_convention = get_msu_name_convention(msu)
-        logging.debug(f'Naming Conv: {naming_convention}')
-        new_file_name = f"{naming_convention}.sfc"
-        logging.debug(f'New file name: {new_file_name}')
-        rmv_existing_sfc(msu, naming_convention)
-        sfc_file = get_selected_sfc()
-        if sfc_file == "":
-            messagebox.showerror("Error", "No SFC file downloaded.")
-        else:
-            logging.debug(f'SFC File: {sfc_file}')
-            new_sfc_path = os.path.join(get_full_msu_dir(msu), new_file_name)  # Pass msu to get_full_msu_dir
-            logging.debug(f'New SFC Path: {new_sfc_path}')
-            move_file(sfc_file, new_sfc_path)
-
-            if os.path.exists(new_sfc_path):
-                messagebox.showinfo("Info", f"SFC successfully moved to {get_full_msu_dir(msu)}")
-                if get_user_settings()['auto_run'] == 1:
-                    self.auto_run(new_sfc_path)
-
-            if get_user_settings()['tracker_path']:
-                self.auto_run(get_user_settings()['tracker_path'])
+        # Find and switch to the requested page
+        for i in range(self.stack.count()):
+            if isinstance(self.stack.widget(i), page_class):
+                self.stack.setCurrentIndex(i)
+                break

@@ -8,6 +8,7 @@ dist/
 build/
 *.egg-info/
 *.spec
+.DS_Store
 
 # Local development
 venv/
@@ -15,7 +16,6 @@ venv/
 *.log
 log_level.txt
 *.db
-.DS_Store
 
 # Credentials
 client_secrets.json

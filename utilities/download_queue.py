@@ -3,7 +3,7 @@ import os
 from queue import Queue
 import threading
 
-from utilities.file_management import extract_msu, get_msu_dir
+from alttpr_tool.utilities.file_management import extract_msu, get_msu_dir
 
 
 class DownloadQueue:

@@ -10,8 +10,8 @@ import py7zr
 import rarfile
 import yaml
 
-from config import BASE_DIR, PRESETS_DIR
-from database.operations import get_user_settings
+from alttpr_tool.config import BASE_DIR, PRESETS_DIR
+from alttpr_tool.database.operations import get_user_settings
 
 def get_msu_dir():
     """Retrieve the MSU directory path from user settings."""

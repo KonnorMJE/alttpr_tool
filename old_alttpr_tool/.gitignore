@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+
+# Distribution/packaging
+dist/
+build/
+*.egg-info/
+*.spec
+
+# Local development
+venv/
+.env
+*.log
+log_level.txt
+*.db
+
+# Credentials
+client_secrets.json
+token.pickle

@@ -5,7 +5,7 @@ import json
 import yaml
 import logging
 
-from config import PRESETS_DIR
+from alttpr_tool.config import Config
 
 # Function to read and parse the YAML preset file
 def get_yaml_presets():
@@ -16,7 +16,7 @@ def get_yaml_presets():
     """
     logging.info("Fetching goals from YAML presets")
     presets = []
-    for file in os.listdir(PRESETS_DIR):
+    for file in os.listdir(Config.PRESETS_DIR):
         if file.endswith('.yaml') or file.endswith('.yml'):
             file_name, ext = os.path.splitext(file)
             presets.append(file_name)
@@ -25,10 +25,10 @@ def get_yaml_presets():
     return presets
 
 def read_yaml_preset(preset_name):
-    for file in os.listdir(PRESETS_DIR):
+    for file in os.listdir(Config.PRESETS_DIR):
         file_name, ext = os.path.splitext(file)
         if file_name == preset_name:
-            file_path = os.path.join(PRESETS_DIR, file)
+            file_path = os.path.join(Config.PRESETS_DIR, file)
             with open(file_path, 'r') as preset_file:
                 yaml_content = yaml.safe_load(preset_file)
 
