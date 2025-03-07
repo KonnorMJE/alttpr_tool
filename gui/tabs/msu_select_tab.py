@@ -2,9 +2,17 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QHBoxLayout, QLabel,
                             QComboBox, QPushButton, QFrame, QGroupBox)
 from PyQt6.QtCore import Qt
 
+from alttpr_tool.utilities.file_management import FileManager
+
 class MSUSelectTab(QWidget):
     def __init__(self):
         super().__init__()
+        self.file_manager = FileManager()
+        self.setup_ui()  # Call setup_ui in __init__
+        self.refresh_data()  # Initial data load
+
+    def setup_ui(self):
+        """Initialize the UI components."""
         layout = QVBoxLayout(self)
         layout.setSpacing(20)
 
@@ -22,7 +30,6 @@ class MSUSelectTab(QWidget):
         sfc_dropdown_layout = QHBoxLayout()
         self.sfc_dropdown = QComboBox()
         self.sfc_dropdown.setToolTip("Select a ROM file")
-        self.sfc_dropdown.addItems(["ROM 1.sfc", "ROM 2.sfc", "ROM 3.sfc"])
         self.sfc_dropdown.currentTextChanged.connect(self.update_rom_info)
         
         sfc_refresh_button = QPushButton("Refresh")
@@ -67,7 +74,7 @@ class MSUSelectTab(QWidget):
         msu_dropdown_layout = QHBoxLayout()
         self.msu_dropdown = QComboBox()
         self.msu_dropdown.setToolTip("Select an MSU pack")
-        self.msu_dropdown.addItems(["MSU Pack 1", "MSU Pack 2", "MSU Pack 3"])
+        self.msu_dropdown.currentTextChanged.connect(self.update_rom_info)
         
         msu_refresh_button = QPushButton("Refresh")
         msu_refresh_button.setToolTip("Refresh the list of available MSU packs")
@@ -123,4 +130,19 @@ class MSUSelectTab(QWidget):
         print("Refreshing ROM list")
 
     def refresh_msu_list(self):
-        print("Refreshing MSU list") 
+        print("Refreshing MSU list")
+
+    def refresh_data(self):
+        """Refresh all data and update UI elements."""
+        # Get fresh data
+        self.sfc_files = self.file_manager.get_sfc_files()
+        self.msu_files = self.file_manager.get_msus()
+        
+        # Update UI elements
+        self.sfc_dropdown.clear()
+        self.sfc_dropdown.addItems(self.sfc_files)
+        
+        self.msu_dropdown.clear()
+        self.msu_dropdown.addItems(self.msu_files)
+        
+        self.rom_info.setText("No ROM selected") 

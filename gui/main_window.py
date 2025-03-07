@@ -108,13 +108,19 @@ class MainWindow(QMainWindow):
         self.stack.setCurrentIndex(0)
 
     def switch_page(self, page_class):
+        """Switch to the specified page and refresh its data."""
+        if not self.stack.currentWidget() or not isinstance(self.stack.currentWidget(), page_class):
+            # Only create a new instance if we're switching to a different page type
+            new_page = page_class()
+            self.stack.addWidget(new_page)
+            self.stack.setCurrentWidget(new_page)
+        else:
+            # If we're already on a page of this type, just refresh its data
+            current_page = self.stack.currentWidget()
+            if hasattr(current_page, 'refresh_data'):
+                current_page.refresh_data()
+
         # Uncheck all buttons except the clicked one
         for btn in self.nav_buttons:
             if btn.text() != self.sender().text():
                 btn.setChecked(False)
-
-        # Find and switch to the requested page
-        for i in range(self.stack.count()):
-            if isinstance(self.stack.widget(i), page_class):
-                self.stack.setCurrentIndex(i)
-                break

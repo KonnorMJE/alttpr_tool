@@ -3,11 +3,12 @@ import os
 from queue import Queue
 import threading
 
-from alttpr_tool.utilities.file_management import extract_msu, get_msu_dir
+from alttpr_tool.utilities.file_management import FileManager
 
 
 class DownloadQueue:
     def __init__(self, all_downloads_complete_callback=None):
+        self.file_manager = FileManager()
         self.queue = Queue()
         self.is_downloading = False
         self.total_downloads = 0
@@ -19,11 +20,12 @@ class DownloadQueue:
         """
         Add a download task to the queue.
 
-        :param file_id: File ID to be downloaded.
-        :param destination_path: Path where the downloaded file will be saved.
-        :param download_method: The method to use for downloading the file.
-        :param progress_callback: Optional callback for download progress.
-        :param completion_callback: Optional callback for download completion.
+        Args:
+            file_id: File ID to be downloaded.
+            destination_path: Path where the downloaded file will be saved.
+            download_method: The method to use for downloading the file.
+            progress_callback: Optional callback for download progress.
+            completion_callback: Optional callback for download completion.
         """
         self.queue.put((file_id, destination_path, download_method, progress_callback, completion_callback))
         self.total_downloads += 1
@@ -44,11 +46,12 @@ class DownloadQueue:
         """
         Download a file.
 
-        :param file_id: File ID to be downloaded.
-        :param destination_path: Path where the downloaded file will be saved.
-        :param download_method: The method to use for downloading the file.
-        :param progress_callback: Optional callback for download progress.
-        :param completion_callback: Optional callback for download completion.
+        Args:
+            file_id: File ID to be downloaded.
+            destination_path: Path where the downloaded file will be saved.
+            download_method: The method to use for downloading the file.
+            progress_callback: Optional callback for download progress.
+            completion_callback: Optional callback for download completion.
         """
         def on_progress(progress):
             if progress_callback:
@@ -69,15 +72,16 @@ class DownloadQueue:
         """
         Handle post-download actions and invoke completion callback.
 
-        :param destination_path: Path where the downloaded file was saved.
-        :param completion_callback: Callback for download completion.
-        :param error: Optional error message if download failed.
+        Args:
+            destination_path: Path where the downloaded file was saved.
+            completion_callback: Callback for download completion.
+            error: Optional error message if download failed.
         """
         self.completed_downloads += 1
         try:
             if error is None:
-                msu_dir = get_msu_dir()
-                extract_msu(destination_path, msu_dir)
+                msu_dir = self.file_manager.get_msu_dir()
+                self.file_manager.extract_msu(destination_path, msu_dir)
                 logging.info(f"Download complete, file extracted to {msu_dir}")
 
                 if completion_callback:
@@ -104,6 +108,8 @@ class DownloadQueue:
     def is_queue_empty(self):
         """
         Check if the download queue is empty.
-        :return: Current status of queue
+
+        Returns:
+            Current status of queue.
         """
         return self.queue.empty()

@@ -4,8 +4,8 @@ import logging
 
 from googleapiclient.discovery import build
 
-from config import FETCH_TIMEOUT_IN_SECONDS, MSU_SHEET_ID
-from utilities.google_services import get_sheets_service
+from alttpr_tool.config import Config
+from alttpr_tool.utilities.google_services import GoogleServices
 
 class GoogleSheetsData:
     """
@@ -15,7 +15,7 @@ class GoogleSheetsData:
     _last_fetched_time = None
 
     try:
-        service = get_sheets_service()
+        service = GoogleServices().get_sheets_service()
         sheet = service.spreadsheets()
         logging.info("Google Sheets service established")
     except Exception as e:
@@ -26,8 +26,11 @@ class GoogleSheetsData:
         """
         Converts a list of data into a list of dictionaries.
 
-        :param list_of_vals: List of values to be converted.
-        :return: List of dictionaries.
+        Args:
+            list_of_vals: List of values to be converted.
+
+        Returns:
+            List of dictionaries.
         """
         values = list_of_vals
 
@@ -44,10 +47,11 @@ class GoogleSheetsData:
         """
         Fetches all data from the Google Sheet and updates the cache.
 
-        :return: Data fetched from the sheet as a list of dictionaries.
+        Returns:
+            Data fetched from the sheet as a list of dictionaries.
         """
         try:
-            result = cls.sheet.values().get(spreadsheetId=MSU_SHEET_ID, range="A:J").execute()
+            result = cls.sheet.values().get(spreadsheetId=Config().MSU_SHEET_ID, range="A:J").execute()
             values = result.get('values', [])
             cls._data_cache = cls.convert_to_dict(values)
             cls._last_fetched_time = time.time()
@@ -62,7 +66,8 @@ class GoogleSheetsData:
         """
         Determines whether to use cached data or fetch fresh data from Google Sheet.
 
-        :return: List of MSU data.
+        Returns:
+            List of MSU data.
         """
         current_time = time.time()
 
@@ -76,7 +81,8 @@ class GoogleSheetsData:
         """
         Fetches a list of all MSU names from the cached Google Sheet data.
 
-        :return: List of MSU names.
+        Returns:
+            List of MSU names.
         """
         if cls._data_cache:
             # return [entry['Pack Name'] for entry in cls._data_cache if entry['Download'].startswith("https://drive")]
@@ -88,8 +94,11 @@ class GoogleSheetsData:
         """
         Given an MSU name, fetches the corresponding download link from the cached data.
 
-        :param msu_name: Name of the MSU pack.
-        :return: Download link for the specified MSU pack.
+        Args:
+            msu_name: Name of the MSU pack.
+
+        Returns:
+            Download link for the specified MSU pack.
         """
         if cls._data_cache:
             for entry in cls._data_cache:
@@ -101,8 +110,11 @@ class GoogleSheetsData:
         """
         Returns a list of dictionaries containing details for the specified MSU names.
 
-        :param msu_names: List of MSU names.
-        :return: List of dictionaries with MSU data.
+        Args:
+            msu_names: List of MSU names.
+
+        Returns:
+            List of dictionaries with MSU data.
         """
         if not cls._data_cache:
             return []

@@ -4,6 +4,8 @@ from PyQt6.QtWidgets import (QWidget, QVBoxLayout, QTableView,
 from PyQt6.QtGui import QStandardItemModel, QStandardItem
 from PyQt6.QtCore import Qt
 from datetime import datetime
+import logging
+from PyQt6.QtWidgets import QMessageBox
 
 class ReadOnlyDelegate(QStyledItemDelegate):
     """Delegate to make certain columns read-only"""
@@ -13,8 +15,11 @@ class ReadOnlyDelegate(QStyledItemDelegate):
 class SeedHistoryTab(QWidget):
     def __init__(self):
         super().__init__()
+        self.setup_ui()
+        self.refresh_data()
         
-        # Create main layout
+    def setup_ui(self):
+        """Initialize the UI components."""
         layout = QVBoxLayout(self)
         
         # Create the table view
@@ -29,32 +34,6 @@ class SeedHistoryTab(QWidget):
             "Completed", "Completion Time"
         ])
         
-        # Add some sample data
-        sample_data = [
-            [datetime.now().strftime("%Y-%m-%d %H:%M"), 
-             "Standard", 
-             "Weekly Race Seed", 
-             "https://alttpr.com/en/h/ABCDEF1234",
-             "No",
-             ""],
-            [datetime.now().strftime("%Y-%m-%d %H:%M"), 
-             "Keysanity", 
-             "Practice Seed", 
-             "https://alttpr.com/en/h/ZYXWVU5678",
-             "Yes",
-             "2:15:30"],
-            [datetime.now().strftime("%Y-%m-%d %H:%M"), 
-             "Entrance", 
-             "Daily Challenge", 
-             "https://alttpr.com/en/h/QWERTY9012",
-             "No",
-             ""],
-        ]
-        
-        for row_data in sample_data:
-            row_items = [QStandardItem(str(item)) for item in row_data]
-            self.model.appendRow(row_items)
-        
         # Make only Completed and Completion Time columns editable
         readonly_delegate = ReadOnlyDelegate(self)
         for col in range(4):  # First 4 columns are read-only
@@ -64,12 +43,11 @@ class SeedHistoryTab(QWidget):
         self.table_view.setModel(self.model)
         header = self.table_view.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.ResizeToContents)
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)  # Description column stretches
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         
         # Create button layout
         button_layout = QHBoxLayout()
         
-        # Add buttons
         refresh_button = QPushButton("Refresh")
         refresh_button.clicked.connect(self.refresh_data)
         
@@ -80,14 +58,36 @@ class SeedHistoryTab(QWidget):
         button_layout.addWidget(export_button)
         button_layout.addStretch()
         
-        # Add widgets to main layout
         layout.addWidget(self.table_view)
         layout.addLayout(button_layout)
-        
+
     def refresh_data(self):
-        """Refresh the table data (just prints for now)"""
-        print("Refresh clicked")
-        
+        """Refresh all data and update UI elements."""
+        try:
+            # Clear existing data
+            self.model.removeRows(0, self.model.rowCount())
+            
+            # Add fresh data (replace with your actual data source)
+            sample_data = [
+                [datetime.now().strftime("%Y-%m-%d %H:%M"), 
+                 "Standard", 
+                 "Weekly Race Seed", 
+                 "https://alttpr.com/en/h/ABCDEF1234",
+                 "No",
+                 ""],
+                # ... more data ...
+            ]
+            
+            for row_data in sample_data:
+                row_items = [QStandardItem(str(item)) for item in row_data]
+                self.model.appendRow(row_items)
+                
+            logging.info("Refreshed seed history data")
+            
+        except Exception as e:
+            logging.error(f"Error refreshing seed history: {e}")
+            QMessageBox.warning(self, "Error", "Failed to refresh seed history")
+
     def export_to_csv(self):
         """Export the table data to CSV (just prints for now)"""
         print("Export clicked")

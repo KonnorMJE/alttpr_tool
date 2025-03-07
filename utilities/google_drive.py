@@ -3,12 +3,12 @@ import logging
 import re
 
 from googleapiclient.http import MediaFileUpload, MediaIoBaseDownload
-from utilities.google_services import get_drive_service
+from alttpr_tool.utilities.google_services import GoogleServices
 
 
 class GoogleDriveData:
     try:
-        service = get_drive_service()
+        service = GoogleServices().get_drive_service()
         logging.info("Google Drive service established")
     except Exception as e:
         logging.error(f"Error when establishing connection to Google Drive: {e}")
@@ -18,9 +18,10 @@ class GoogleDriveData:
         """
         Downloads a file from Google Drive.
 
-        :param file_id: ID of the file to be downloaded.
-        :param destination_path: Local path to save the downloaded file.
-        :param callback: Optional function to be called with the download progress.
+        Args:
+            file_id: ID of the file to be downloaded.
+            destination_path: Local path to save the downloaded file.
+            callback: Optional function to be called with the download progress.
         """
         try:
             request = cls.service.files().get_media(fileId=file_id)
